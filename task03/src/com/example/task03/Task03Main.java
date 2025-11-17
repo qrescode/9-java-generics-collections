@@ -4,8 +4,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Task03Main {
 
@@ -19,6 +21,30 @@ public class Task03Main {
     }
 
     public static List<Set<String>> findAnagrams(InputStream inputStream, Charset charset) {
-        return null;
+
+        Set<String> words = new BufferedReader(new InputStreamReader(inputStream, charset))
+                .lines()
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(s -> s.length() >= 3)
+                .filter(s -> s.matches("[а-яё]+"))
+                .collect(Collectors.toSet());
+
+        Map<String, List<String>> map = new HashMap<>();
+
+        for (String word : words) {
+            char[] chars = word.toCharArray();
+            Arrays.sort(chars);
+            String key = new String(chars);
+
+            map.computeIfAbsent(key, k -> new ArrayList<>()).add(word);
+        }
+
+        return map.values().stream()
+                .filter(list -> list.size() >= 2)
+                .peek(Collections::sort)
+                .sorted(Comparator.comparing(list -> list.get(0)))
+                .map(list -> new LinkedHashSet<>(list))
+                .collect(Collectors.toList());
     }
 }
